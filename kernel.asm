@@ -33,7 +33,6 @@
  
    mov si,badcommand
    call print_string 
-   call counter
    jmp mainloop  
  
  .helloworld:
@@ -52,8 +51,6 @@
  badcommand db 'Bad command entered.', 0x0D, 0x0A, 0
  msg_firstNum db 'Insert first number:', 0x0D, 0x0A, 0
  msg_SecondNum db 'Insert second number:', 0x0D, 0x0A, 0
- msg_counter db 'counter called.', 0x0D, 0x0A, 0
- msg_addOne db 'addOne called.', 0x0D, 0x0A, 0
  prompt db '>', 0
  cmd_hi db 'hi', 0
  cmd_help db 'help', 0
@@ -141,7 +138,7 @@
      mov di, buffer
      call get_string
 
-     mov ax, buffer
+     mov bx, [buffer]
 
      mov si, msg_SecondNum
      call print_string
@@ -149,27 +146,25 @@
      mov di, buffer
      call get_string
 
-     mov si, buffer
+     add bx, [buffer]
+     sub bx, 48
+
+     mov [answer_buff], bx
+
+     mov si, answer_buff
      call print_string
 
+     mov al, 0 ; null terminator
+     stosb
+    
+     mov ah, 0x0E
+     mov al, 0x0D
+     int 0x10
+     mov al, 0x0A
+     int 0x10 
      ret
 
-counter:
-   cmp ax, 0
-   mov si, msg_counter
-   call print_string
-   je addOne
-   cmp ax, 2
-   je sum
-   ret
-
-addOne:
-   add ax, 0x1
-   mov si, msg_addOne
-   call print_string
-   mov si, ax
-   call print_string
-   ret
+answer_buff times 16 db 0
 
  strcmp:
  .loop:
