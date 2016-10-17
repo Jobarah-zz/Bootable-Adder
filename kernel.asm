@@ -27,12 +27,13 @@
    jc .helloworld
  
    mov si, buffer
-   mov di, cmd_help  ; "help" command
+   mov di, cmd_sum  ; "help" command
    call strcmp
-   jc .help
+   jc .sum
  
    mov si,badcommand
    call print_string 
+   call counter
    jmp mainloop  
  
  .helloworld:
@@ -41,19 +42,23 @@
  
    jmp mainloop
  
- .help:
-   mov si, msg_help
-   call print_string
- 
+ .sum:
+   call sum
+
    jmp mainloop
  
  welcome db 'Welcome to My OS!', 0x0D, 0x0A, 0
  msg_helloworld db 'Hello OSDev World!', 0x0D, 0x0A, 0
  badcommand db 'Bad command entered.', 0x0D, 0x0A, 0
+ msg_firstNum db 'Insert first number:', 0x0D, 0x0A, 0
+ msg_SecondNum db 'Insert second number:', 0x0D, 0x0A, 0
+ msg_counter db 'counter called.', 0x0D, 0x0A, 0
+ msg_addOne db 'addOne called.', 0x0D, 0x0A, 0
  prompt db '>', 0
  cmd_hi db 'hi', 0
  cmd_help db 'help', 0
- msg_help db 'My OS: Commands: hi, help', 0x0D, 0x0A, 0
+ cmd_sum db 'sum', 0
+ msg_help db 'My OS: Commands: hi, help, sum', 0x0D, 0x0A, 0
  buffer times 64 db 0
  
  ; ================
@@ -129,6 +134,43 @@
  
    ret
  
+ sum:
+     mov si, msg_firstNum
+     call print_string
+    
+     mov di, buffer
+     call get_string
+
+     mov ax, buffer
+
+     mov si, msg_SecondNum
+     call print_string
+
+     mov di, buffer
+     call get_string
+
+     mov si, buffer
+     call print_string
+
+     ret
+
+counter:
+   cmp ax, 0
+   mov si, msg_counter
+   call print_string
+   je addOne
+   cmp ax, 2
+   je sum
+   ret
+
+addOne:
+   add ax, 0x1
+   mov si, msg_addOne
+   call print_string
+   mov si, ax
+   call print_string
+   ret
+
  strcmp:
  .loop:
    mov al, [si]   ; grab a byte from SI
