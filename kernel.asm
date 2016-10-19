@@ -95,8 +95,10 @@
      mov di, buffer
      call get_string
 
-     mov bx, [buffer]
-     mov dx, bx
+     mov bx, buffer
+     call atoi
+
+     mov dx, ax
 
      mov si, msg_SecondNum
      call print_string
@@ -104,16 +106,12 @@
      mov di, buffer
      call get_string
 
-     add bx, [buffer]
-     sub bx, 48
-
-     mov [answer_buff], bx
-
-     mov si, answer_buff
-     call print_string
-     
-     mov ax, '1'
+     mov bx, buffer
      call atoi
+
+     add dx, ax
+
+     mov ax, dx
      call print_int
 
      mov al, 0 ; null terminator
@@ -128,7 +126,7 @@
 
 answer_buff times 16 db 0
 
-atoi: ;recive en bx
+atoi: ;receive en bx
    xor ax, ax ; zero a "result so far"
    .top:
       movzx cx, byte [bx] ; get a character
