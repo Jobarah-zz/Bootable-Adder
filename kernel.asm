@@ -27,7 +27,7 @@
    jc .helloworld
  
    mov si, buffer
-   mov di, cmd_sum  ; "help" command
+   mov di, cmd_sum  ; "sum" command
    call strcmp
    jc .sum
  
@@ -60,8 +60,7 @@
  
  ; ================
  ; calls start here
- ; ================
- 
+ ; =============== 
  print_string:
    lodsb        ; grab a byte from SI
  
@@ -139,6 +138,7 @@
      call get_string
 
      mov bx, [buffer]
+     call atoi
 
      mov si, msg_SecondNum
      call print_string
@@ -165,6 +165,15 @@
      ret
 
 answer_buff times 16 db 0
+
+atoi:
+   cmp bx,0
+   jz .done
+   imul bx, 10
+   mov ax,[esp+2]
+   jmp atoi
+.done:
+   ret
 
  strcmp:
  .loop:
