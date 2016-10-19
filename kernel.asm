@@ -5,11 +5,7 @@
    mov ds, ax
    mov es, ax
    mov ss, ax     ; setup stack
-   mov sp, 0x7C00 ; stack grows downwards from 0x7C00
- 
-   mov si, welcome
-   call print_string
- 
+   mov sp, 0x7C00 ; stack grows downwards from 0x7C00 
  mainloop:
    mov si, prompt
    call print_string
@@ -22,11 +18,6 @@
    je mainloop       ; yes, ignore it
  
    mov si, buffer
-   mov di, cmd_hi  ; "hi" command
-   call strcmp
-   jc .helloworld
- 
-   mov si, buffer
    mov di, cmd_sum  ; "sum" command
    call strcmp
    jc .sum
@@ -34,28 +25,18 @@
    mov si,badcommand
    call print_string 
    jmp mainloop  
- 
- .helloworld:
-   mov si, msg_helloworld
-   call print_string
- 
-   jmp mainloop
- 
+  
  .sum:
    call sum
 
    jmp mainloop
  
- welcome db 'Welcome to My OS!', 0x0D, 0x0A, 0
- msg_helloworld db 'Hello OSDev World!', 0x0D, 0x0A, 0
  badcommand db 'Bad command entered.', 0x0D, 0x0A, 0
  msg_firstNum db 'Insert first number:', 0x0D, 0x0A, 0
  msg_SecondNum db 'Insert second number:', 0x0D, 0x0A, 0
  prompt db '>', 0
- cmd_hi db 'hi', 0
- cmd_help db 'help', 0
  cmd_sum db 'sum', 0
- msg_help db 'My OS: Commands: hi, help, sum', 0x0D, 0x0A, 0
+ msg_help db 'My OS: Commands: sum', 0x0D, 0x0A, 0
  buffer times 64 db 0
  
  ; ================
@@ -82,9 +63,6 @@
    mov ah, 0
    int 0x16   ; wait for keypress
  
-   cmp al, 0x08    ; backspace pressed?
-   je .backspace   ; yes, handle it
- 
    cmp al, 0x0D  ; enter pressed?
    je .done      ; yes, we're done
  
@@ -98,27 +76,7 @@
    inc cl
    jmp .loop
  
- .backspace:
-   cmp cl, 0	; beginning of string?
-   je .loop	; yes, ignore the key
- 
-   dec di
-   mov byte [di], 0	; delete character
-   dec cl		; decrement counter as well
- 
-   mov ah, 0x0E
-   mov al, 0x08
-   int 10h		; backspace on the screen
- 
-   mov al, ' '
-   int 10h		; blank character out
- 
-   mov al, 0x08
-   int 10h		; backspace again
- 
-   jmp .loop	; go to the main loop
- 
- .done:
+  .done:
    mov al, 0	; null terminator
    stosb
  
@@ -139,7 +97,6 @@
 
      mov bx, [buffer]
      mov dx, bx
-     call atoi
 
      mov si, msg_SecondNum
      call print_string
@@ -154,6 +111,10 @@
 
      mov si, answer_buff
      call print_string
+     
+     mov ax, '1'
+     call atoi
+     call print_int
 
      mov al, 0 ; null terminator
      stosb
@@ -167,14 +128,54 @@
 
 answer_buff times 16 db 0
 
-atoi:
-   cmp bx,0
-   jz .done
-   imul bx, 10
-   mov bx,[bx+2]
-   jmp atoi
-.done:
-   ret
+atoi: ;recive en bx
+   xor ax, ax ; zero a "result so far"
+   .top:
+      movzx cx, byte [bx] ; get a character
+      inc bx ; ready for next one
+      cmp cx, '0' ; valid?
+      jb .done
+      cmp cx, '9'
+      ja .done
+      sub cx, '0' ; "convert" character to number
+      imul ax, 10 ; multiply "result so far" by ten
+      add ax, cx ; add in current digit
+      jmp .top ; until done
+
+   .done:
+      ret
+
+
+print_int: ;void print_int(int number) value in ax 
+    push    ax             
+    push    cx             
+    push    dx             
+    push    si             
+    mov     cx, 0          
+ 
+divideLoop:
+    inc     cx             
+    mov     dx, 0          
+    mov     si, 10         
+    idiv    si             
+    add     dx, 48         
+    push    dx             
+    cmp     ax, 0          
+    jnz     divideLoop     
+
+printLoop:
+    dec     cx             
+    mov     si, sp        
+    call    print_string  
+    pop     ax            
+    cmp     cx, 0         
+    jnz     printLoop     
+ 
+    pop     si            
+    pop     dx            
+    pop     cx            
+    pop     ax            
+    ret
 
  strcmp:
  .loop:
