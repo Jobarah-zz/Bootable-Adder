@@ -138,6 +138,7 @@
      call get_string
 
      mov bx, [buffer]
+     mov dx, bx
      call atoi
 
      mov si, msg_SecondNum
@@ -170,7 +171,7 @@ atoi:
    cmp bx,0
    jz .done
    imul bx, 10
-   mov ax,[esp+2]
+   mov bx,[bx+2]
    jmp atoi
 .done:
    ret
