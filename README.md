@@ -1,4 +1,4 @@
-# SistemasOperativos
+# Assembly Booteable Adder
 To run this file:  
 nasm kernel.asm -f bin -o kernel.bin  
 dd status=noxfer conv=notrunc if=kernel.bin of=kernel.flp  
